@@ -6,6 +6,7 @@ from tqdm import tqdm
 from abc import ABC, abstractmethod
 
 import openai
+from openai import OpenAI
 
 client = OpenAI()
 
