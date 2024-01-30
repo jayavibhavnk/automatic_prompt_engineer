@@ -8,7 +8,7 @@ from abc import ABC, abstractmethod
 import openai
 
 gpt_costs_per_thousand = {
-    'gpt-3.5-turbo-1106': 0.0010, 
+    'gpt-3.5-turbo': 0.0010, 
     'davinci': 0.0200,
     'curie': 0.0020,
     'babbage': 0.0005,
@@ -360,7 +360,7 @@ def gpt_get_estimated_cost(config, prompt, max_tokens):
         # Try as if it is a fine-tuned model
         engine = config['gpt_config']['model'].split(':')[0]
         costs_per_thousand = {
-            'gpt-3.5-turbo-1106': 0.0010, 
+            'gpt-3.5-turbo': 0.0010, 
             'davinci': 0.1200,
             'curie': 0.0120,
             'babbage': 0.0024,
