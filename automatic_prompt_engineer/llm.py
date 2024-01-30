@@ -7,6 +7,9 @@ from abc import ABC, abstractmethod
 
 import openai
 
+from openai import OpenAI
+client = OpenAI()
+
 gpt_costs_per_thousand = {
     'davinci': 0.0200,
     'curie': 0.0020,
@@ -158,8 +161,13 @@ class GPT_Forward(LLM):
         while response is None:
             try:
                 print(config)
-                response = openai.Completion.create(
-                    **config, prompt=prompt)
+                completion = client.chat.completions.create(
+                messages=[
+                    {"role": "system", "content": "You are a helpful assistant."},
+                    {"role": "user", "content": prompt}
+                ],
+                    **config,
+                )
             except Exception as e:
                 if 'is greater than the maximum' in str(e):
                     raise BatchSizeException()
@@ -167,7 +175,7 @@ class GPT_Forward(LLM):
                 print('Retrying...')
                 time.sleep(5)
 
-        return [response['choices'][i]['text'] for i in range(len(response['choices']))]
+        return [completion.choices[i].message.content for i in range(len(completion.choices))]
 
     def __complete(self, prompt, n):
         """Generates text from the model and returns the log prob data."""
@@ -181,8 +189,13 @@ class GPT_Forward(LLM):
         response = None
         while response is None:
             try:
-                response = openai.Completion.create(
-                    **config, prompt=prompt)
+                completion = client.chat.completions.create(
+                messages=[
+                    {"role": "system", "content": "You are a helpful assistant."},
+                    {"role": "user", "content": prompt}
+                ],
+                    **config,
+                )
             except Exception as e:
                 print(e)
                 print('Retrying...')
@@ -210,18 +223,26 @@ class GPT_Forward(LLM):
         response = None
         while response is None:
             try:
-                response = openai.Completion.create(
-                    **config, prompt=text)
+                completion = client.chat.completions.create(
+                messages=[
+                    {"role": "system", "content": "You are a helpful assistant."},
+                    {"role": "user", "content": text}
+                ],
+                **config,
+                logprobs=True
+                )
             except Exception as e:
                 print(e)
                 print('Retrying...')
                 time.sleep(5)
-        log_probs = [response['choices'][i]['logprobs']['token_logprobs'][1:]
-                     for i in range(len(response['choices']))]
+                API_RESPONSE.choices[0].logprobs.content[0].top_logprobs
+                
+        log_probs = completion.choices[i].logprobs.content[i].token_logprobs[1:]
+                    for i in range(len(completion.choices))]
         tokens = [response['choices'][i]['logprobs']['tokens'][1:]
-                  for i in range(len(response['choices']))]
+                  for i in range(len(completion.choices))]
         offsets = [response['choices'][i]['logprobs']['text_offset'][1:]
-                   for i in range(len(response['choices']))]
+                   for i in range(len(completion.choices))]
 
         # Subtract 1 from the offsets to account for the newline
         for i in range(len(offsets)):
@@ -317,15 +338,21 @@ class GPT_Insert(LLM):
         response = None
         while response is None:
             try:
-                response = openai.Completion.create(
-                    **config, prompt=prefix, suffix=suffix)
+                completion = client.chat.completions.create(
+                model="gpt-3.5-turbo",
+                messages=[
+                    {"role": "system", "content": "You are a helpful assistant."},
+                    {"role": "user", "content": prefix + suffix}
+                ],
+                **config,
+                )
             except Exception as e:
                 print(e)
                 print('Retrying...')
                 time.sleep(5)
 
         # Remove suffix from the generated text
-        texts = [response['choices'][i]['text'].replace(suffix, '') for i in range(len(response['choices']))]
+        texts = [(completion.choices[i].message.content).replace(suffix, '') for i in range(len(completion.choices))]
         return texts
 
 
