@@ -7,9 +7,6 @@ from abc import ABC, abstractmethod
 
 import openai
 
-from openai import OpenAI
-client = OpenAI()
-
 gpt_costs_per_thousand = {
     'davinci': 0.0200,
     'curie': 0.0020,
@@ -160,14 +157,8 @@ class GPT_Forward(LLM):
         response = None
         while response is None:
             try:
-                print(config)
-                completion = client.chat.completions.create(
-                messages=[
-                    {"role": "system", "content": "You are a helpful assistant."},
-                    {"role": "user", "content": prompt}
-                ],
-                    **config,
-                )
+                response = openai.Completion.create(
+                    **config, prompt=prompt)
             except Exception as e:
                 if 'is greater than the maximum' in str(e):
                     raise BatchSizeException()
@@ -175,7 +166,7 @@ class GPT_Forward(LLM):
                 print('Retrying...')
                 time.sleep(5)
 
-        return [completion.choices[i].message.content for i in range(len(completion.choices))]
+        return [response['choices'][i]['text'] for i in range(len(response['choices']))]
 
     def __complete(self, prompt, n):
         """Generates text from the model and returns the log prob data."""
@@ -189,13 +180,8 @@ class GPT_Forward(LLM):
         response = None
         while response is None:
             try:
-                completion = client.chat.completions.create(
-                messages=[
-                    {"role": "system", "content": "You are a helpful assistant."},
-                    {"role": "user", "content": prompt}
-                ],
-                    **config,
-                )
+                response = openai.Completion.create(
+                    **config, prompt=prompt)
             except Exception as e:
                 print(e)
                 print('Retrying...')
@@ -223,20 +209,12 @@ class GPT_Forward(LLM):
         response = None
         while response is None:
             try:
-                completion = client.chat.completions.create(
-                messages=[
-                    {"role": "system", "content": "You are a helpful assistant."},
-                    {"role": "user", "content": text}
-                ],
-                **config,
-                logprobs=True
-                )
+                response = openai.Completion.create(
+                    **config, prompt=text)
             except Exception as e:
                 print(e)
                 print('Retrying...')
                 time.sleep(5)
-                API_RESPONSE.choices[0].logprobs.content[0].top_logprobs
-
         log_probs = [response['choices'][i]['logprobs']['token_logprobs'][1:]
                      for i in range(len(response['choices']))]
         tokens = [response['choices'][i]['logprobs']['tokens'][1:]
@@ -338,21 +316,15 @@ class GPT_Insert(LLM):
         response = None
         while response is None:
             try:
-                completion = client.chat.completions.create(
-                model="gpt-3.5-turbo",
-                messages=[
-                    {"role": "system", "content": "You are a helpful assistant."},
-                    {"role": "user", "content": prefix + suffix}
-                ],
-                **config,
-                )
+                response = openai.Completion.create(
+                    **config, prompt=prefix, suffix=suffix)
             except Exception as e:
                 print(e)
                 print('Retrying...')
                 time.sleep(5)
 
         # Remove suffix from the generated text
-        texts = [(completion.choices[i].message.content).replace(suffix, '') for i in range(len(completion.choices))]
+        texts = [response['choices'][i]['text'].replace(suffix, '') for i in range(len(response['choices']))]
         return texts
 
 
