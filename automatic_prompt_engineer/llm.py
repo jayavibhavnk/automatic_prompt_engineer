@@ -157,7 +157,7 @@ class GPT_Forward(LLM):
         response = None
         while response is None:
             try:
-                print(**config)
+                print(config)
                 response = openai.Completion.create(
                     **config, prompt=prompt)
             except Exception as e:
