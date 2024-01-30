@@ -159,7 +159,11 @@ class GPT_Forward(LLM):
         while response is None:
             try:
                 response = openai.ChatCompletion.create(
-                    **config, prompt=prompt)
+                    model="gpt-3.5-turbo",
+  messages=[
+    {"role": "system", "content": "You are a helpful assistant."},
+    {"role": "user", "content": prompt}
+  ])
             except Exception as e:
                 if 'is greater than the maximum' in str(e):
                     raise BatchSizeException()
@@ -182,7 +186,11 @@ class GPT_Forward(LLM):
         while response is None:
             try:
                 response = openai.ChatCompletion.create(
-                    **config, prompt=prompt)
+                    model="gpt-3.5-turbo",
+  messages=[
+    {"role": "system", "content": "You are a helpful assistant."},
+    {"role": "user", "content": prompt}
+  ])
             except Exception as e:
                 print(e)
                 print('Retrying...')
@@ -211,7 +219,11 @@ class GPT_Forward(LLM):
         while response is None:
             try:
                 response = openai.ChatCompletion.create(
-                    **config, prompt=prompt)
+                    model="gpt-3.5-turbo",
+  messages=[
+    {"role": "system", "content": "You are a helpful assistant."},
+    {"role": "user", "content": prompt}
+  ])
             except Exception as e:
                 print(e)
                 print('Retrying...')
@@ -319,7 +331,11 @@ class GPT_Insert(LLM):
             try:
                 
                 response = openai.ChatCompletion.create(
-                    **config, prompt=prefix, suffix=suffix)
+                    model="gpt-3.5-turbo",
+  messages=[
+    {"role": "system", "content": "You are a helpful assistant."},
+    {"role": "user", "content": prefix + suffix}
+  ])
             except Exception as e:
                 print(e)
                 print('Retrying...')
