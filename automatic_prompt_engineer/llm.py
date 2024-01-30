@@ -7,6 +7,8 @@ from abc import ABC, abstractmethod
 
 import openai
 
+client = OpenAI()
+
 gpt_costs_per_thousand = {
     'davinci': 0.0200,
     'curie': 0.0020,
@@ -157,8 +159,13 @@ class GPT_Forward(LLM):
         response = None
         while response is None:
             try:
-                response = openai.Completion.create(
-                    **config, prompt=prompt)
+                completion = client.chat.completions.create(
+  model="gpt-3.5-turbo",
+  messages=[
+    {"role": "system", "content": "You are a helpful assistant."},
+    {"role": "user", "content": prompt}
+  ]
+)
             except Exception as e:
                 if 'is greater than the maximum' in str(e):
                     raise BatchSizeException()
@@ -166,7 +173,7 @@ class GPT_Forward(LLM):
                 print('Retrying...')
                 time.sleep(5)
 
-        return [response['choices'][i]['text'] for i in range(len(response['choices']))]
+        return [response.choices[i].message.content for i in range(len(response.choices))]
 
     def __complete(self, prompt, n):
         """Generates text from the model and returns the log prob data."""
