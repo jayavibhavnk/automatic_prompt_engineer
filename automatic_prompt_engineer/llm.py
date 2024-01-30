@@ -8,7 +8,6 @@ from abc import ABC, abstractmethod
 import openai
 
 gpt_costs_per_thousand = {
-    'gpt-3.5-turbo': 0.0010, 
     'davinci': 0.0200,
     'curie': 0.0020,
     'babbage': 0.0005,
@@ -158,12 +157,8 @@ class GPT_Forward(LLM):
         response = None
         while response is None:
             try:
-                response = openai.ChatCompletion.create(
-                    model="gpt-3.5-turbo",
-  messages=[
-    {"role": "system", "content": "You are a helpful assistant."},
-    {"role": "user", "content": prompt}
-  ])
+                response = openai.Completion.create(
+                    **config, prompt=prompt)
             except Exception as e:
                 if 'is greater than the maximum' in str(e):
                     raise BatchSizeException()
@@ -172,7 +167,7 @@ class GPT_Forward(LLM):
                 time.sleep(5)
 
         return [response['choices'][i]['text'] for i in range(len(response['choices']))]
-    
+
     def __complete(self, prompt, n):
         """Generates text from the model and returns the log prob data."""
         if not isinstance(prompt, list):
@@ -185,12 +180,8 @@ class GPT_Forward(LLM):
         response = None
         while response is None:
             try:
-                response = openai.ChatCompletion.create(
-                    model="gpt-3.5-turbo",
-  messages=[
-    {"role": "system", "content": "You are a helpful assistant."},
-    {"role": "user", "content": prompt}
-  ])
+                response = openai.Completion.create(
+                    **config, prompt=prompt)
             except Exception as e:
                 print(e)
                 print('Retrying...')
@@ -218,12 +209,8 @@ class GPT_Forward(LLM):
         response = None
         while response is None:
             try:
-                response = openai.ChatCompletion.create(
-                    model="gpt-3.5-turbo",
-  messages=[
-    {"role": "system", "content": "You are a helpful assistant."},
-    {"role": "user", "content": prompt}
-  ])
+                response = openai.Completion.create(
+                    **config, prompt=text)
             except Exception as e:
                 print(e)
                 print('Retrying...')
@@ -329,13 +316,8 @@ class GPT_Insert(LLM):
         response = None
         while response is None:
             try:
-                
-                response = openai.ChatCompletion.create(
-                    model="gpt-3.5-turbo",
-  messages=[
-    {"role": "system", "content": "You are a helpful assistant."},
-    {"role": "user", "content": prefix + suffix}
-  ])
+                response = openai.Completion.create(
+                    **config, prompt=prefix, suffix=suffix)
             except Exception as e:
                 print(e)
                 print('Retrying...')
@@ -360,7 +342,6 @@ def gpt_get_estimated_cost(config, prompt, max_tokens):
         # Try as if it is a fine-tuned model
         engine = config['gpt_config']['model'].split(':')[0]
         costs_per_thousand = {
-            'gpt-3.5-turbo': 0.0010, 
             'davinci': 0.1200,
             'curie': 0.0120,
             'babbage': 0.0024,
