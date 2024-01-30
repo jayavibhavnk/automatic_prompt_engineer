@@ -159,7 +159,7 @@ class GPT_Forward(LLM):
         while response is None:
             try:
                 response = openai.ChatCompletion.create(
-                    **config, prompt=prompt, model = "gpt-3.5-turbo-1106")
+                    **config, prompt=prompt)
             except Exception as e:
                 if 'is greater than the maximum' in str(e):
                     raise BatchSizeException()
@@ -181,7 +181,7 @@ class GPT_Forward(LLM):
         response = None
         while response is None:
             try:
-                response = openai.Completion.create(
+                response = openai.ChatCompletion.create(
                     **config, prompt=prompt)
             except Exception as e:
                 print(e)
@@ -210,8 +210,8 @@ class GPT_Forward(LLM):
         response = None
         while response is None:
             try:
-                response = openai.Completion.create(
-                    **config, prompt=text)
+                response = openai.ChatCompletion.create(
+                    **config, prompt=prompt)
             except Exception as e:
                 print(e)
                 print('Retrying...')
@@ -317,7 +317,8 @@ class GPT_Insert(LLM):
         response = None
         while response is None:
             try:
-                response = openai.Completion.create(
+                
+                response = openai.ChatCompletion.create(
                     **config, prompt=prefix, suffix=suffix)
             except Exception as e:
                 print(e)
