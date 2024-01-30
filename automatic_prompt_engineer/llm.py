@@ -236,13 +236,13 @@ class GPT_Forward(LLM):
                 print('Retrying...')
                 time.sleep(5)
                 API_RESPONSE.choices[0].logprobs.content[0].top_logprobs
-                
-        log_probs = completion.choices[i].logprobs.content[i].token_logprobs[1:]
-                    for i in range(len(completion.choices))]
+
+        log_probs = [response['choices'][i]['logprobs']['token_logprobs'][1:]
+                     for i in range(len(response['choices']))]
         tokens = [response['choices'][i]['logprobs']['tokens'][1:]
-                  for i in range(len(completion.choices))]
+                  for i in range(len(response['choices']))]
         offsets = [response['choices'][i]['logprobs']['text_offset'][1:]
-                   for i in range(len(completion.choices))]
+                   for i in range(len(response['choices']))]
 
         # Subtract 1 from the offsets to account for the newline
         for i in range(len(offsets)):
