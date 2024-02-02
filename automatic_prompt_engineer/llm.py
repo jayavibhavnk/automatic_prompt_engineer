@@ -201,7 +201,7 @@ class GPT_Forward(LLM):
         config = self.config['gpt_config'].copy()
         config['logprobs'] = 1
         # config['echo'] = 0
-        config['max_tokens'] = 0
+        config['max_tokens'] = 25
         if isinstance(text, list):
             text = [f'\n{text[i]}' for i in range(len(text))]
         else:
